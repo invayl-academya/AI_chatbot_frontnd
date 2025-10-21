@@ -161,14 +161,50 @@ const chatSlice = createSlice({
         // append user + assistant messages
         state.sessions[sessionId].messages.push(userMessage);
         state.sessions[sessionId].messages.push(assistantMessage);
+
+        // update (or insert) thread preview
+        const lastSnippet = assistantMessage.content || userMessage.content;
+        const lastAt = assistantMessage.created_at;
+        const idx = state.threads.findIndex((t) => t.id === sessionId);
+        if (idx === -1) {
+          state.threads.unshift({
+            id: sessionId,
+            lastSnippet,
+            lastAt,
+            count: 2,
+          });
+        } else {
+          state.threads[idx].lastSnippet = lastSnippet;
+          state.threads[idx].lastAt = lastAt;
+          // move updated thread to top
+          const updated = state.threads.splice(idx, 1)[0];
+          state.threads.unshift(updated);
+        }
       })
       .addCase(sendMessage.rejected, (state, action) => {
         state.sending = false;
         state.error = action.payload || "Failed to send message";
+      })
+
+      // history
+      .addCase(fetchHistory.fulfilled, (state, action) => {
+        const { sessionId, messages } = action.payload;
+        if (!state.sessions[sessionId]) {
+          state.sessions[sessionId] = { id: sessionId, messages: [] };
+        }
+        state.sessions[sessionId].messages = messages;
+      })
+
+      // threads
+      .addCase(fetchThreads.fulfilled, (state, action) => {
+        state.threads = action.payload;
       });
   },
 });
 
-export const {} = chatSlice.actions;
+export const { startNewSession, setCurrentSession } = chatSlice.actions;
 
 export default chatSlice.reducer;
+
+//selectors
+export const selectThreads = (s) => s.chat.threads;

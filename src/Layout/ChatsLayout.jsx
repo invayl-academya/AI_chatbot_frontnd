@@ -1,16 +1,66 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { Menu, Plus, MessageCircle, X } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchHistory,
+  fetchThreads,
+  selectThreads,
+  setCurrentSession,
+  startNewSession,
+} from "@/redux/chatSlice";
 
 const ChatsLayout = () => {
   const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
+  const threads = useSelector(selectThreads);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    dispatch(fetchThreads()); // load previews for sidebar
+  }, [dispatch]);
+
   const handleNewChat = () => {
-    // TODO: when we add startNewSession(), dispatch it here
+    dispatch(startNewSession()); // reset current
     navigate("/chats/ask");
     setOpen(false);
   };
+
+  const openThread = async (sid) => {
+    dispatch(setCurrentSession(sid));
+    await dispatch(fetchHistory({ sessionId: sid })).unwrap();
+    navigate("/chats/ask");
+    setOpen(false);
+  };
+
+  const ThreadList = ({ compact = false }) => (
+    <ul className="space-y-1">
+      {threads.length === 0 ? (
+        <li className="flex items-center gap-2 px-2 py-2 rounded-lg text-slate-600 dark:text-slate-300 border border-dashed border-slate-200 dark:border-slate-700">
+          <MessageCircle size={16} />
+          No saved sessions yet
+        </li>
+      ) : (
+        threads.map((t) => (
+          <li
+            key={t.id}
+            onClick={() => openThread(t.id)}
+            className="cursor-pointer px-2 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
+            <div className="flex items-center gap-2">
+              <MessageCircle size={16} className="shrink-0" />
+              <div className="min-w-0">
+                <div className="text-sm font-medium truncate">{t.id}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  {t.lastSnippet}
+                </div>
+              </div>
+            </div>
+          </li>
+        ))
+      )}
+    </ul>
+  );
 
   return (
     <div className="mx-auto max-w-screen-2xl">
@@ -33,20 +83,14 @@ const ChatsLayout = () => {
             </button>
 
             <div className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Sessions (coming soon)
+              Sessions
             </div>
 
-            {/* Placeholder list; wire to Redux later */}
-            <ul className="space-y-1">
-              <li className="flex items-center gap-2 px-2 py-2 rounded-lg text-slate-600 dark:text-slate-300 border border-dashed border-slate-200 dark:border-slate-700">
-                <MessageCircle size={16} />
-                No saved sessions yet
-              </li>
-            </ul>
+            <ThreadList />
           </div>
         </aside>
 
-        {/* Sidebar (mobile drawer) */}
+        {/* Mobile drawer */}
         {open && (
           <div className="md:hidden fixed inset-0 z-40">
             <div
@@ -74,15 +118,10 @@ const ChatsLayout = () => {
                 </button>
 
                 <div className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                  Sessions (coming soon)
+                  Sessions
                 </div>
 
-                <ul className="space-y-1">
-                  <li className="flex items-center gap-2 px-2 py-2 rounded-lg text-slate-600 dark:text-slate-300 border border-dashed border-slate-200 dark:border-slate-700">
-                    <MessageCircle size={16} />
-                    No saved sessions yet
-                  </li>
-                </ul>
+                <ThreadList compact />
               </div>
             </aside>
           </div>
@@ -103,7 +142,6 @@ const ChatsLayout = () => {
           </div>
 
           <div className="p-4">
-            {/* Nested route content (ChatScreen) */}
             <Outlet />
           </div>
         </main>
