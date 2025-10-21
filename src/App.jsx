@@ -1,7 +1,6 @@
 // src/App.jsx
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
-import Chat from "@/components/Chat";
 import Login from "@/screens/userScreens/Login";
 import Register from "@/screens/userScreens/Register";
 import UserLayout from "@/Layout/UserLayout";
@@ -9,6 +8,8 @@ import { fetchMe, hydrateFromStorage } from "./redux/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { setAuthHeader } from "./api/api";
+import ChatScreen from "./screens/ChatScreen";
+import ChatsLayout from "./Layout/ChatsLayout";
 
 function App() {
   const dispatch = useDispatch();
@@ -29,7 +30,11 @@ function App() {
 
       <Routes>
         {/* Home */}
-        <Route path="/" element={<Chat />} />
+
+        <Route path="/chats" element={<ChatsLayout />}>
+          <Route index element={<Navigate to="ask" replace />} />
+          <Route path="ask" element={<ChatScreen />} />
+        </Route>
 
         {/* Auth (full-screen grid from UserLayout) */}
         <Route path="/auth" element={<UserLayout />}>

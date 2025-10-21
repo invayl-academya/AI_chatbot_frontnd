@@ -11,7 +11,7 @@ const Navigation = () => {
   const navigate = useNavigate();
 
   const handlePrimary = () => {
-    if (user) navigate("/");
+    if (user) navigate("/chats");
     else navigate("/auth/login");
   };
 
