@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { setAuthHeader } from "./api/api";
 import ChatScreen from "./screens/ChatScreen";
 import ChatsLayout from "./Layout/ChatsLayout";
+import Landing from "./screens/Landing";
 
 function App() {
   const dispatch = useDispatch();
@@ -30,6 +31,8 @@ function App() {
 
       <Routes>
         {/* Home */}
+
+        <Route path="/" element={<Landing />} />
 
         <Route path="/chats" element={<ChatsLayout />}>
           <Route index element={<Navigate to="ask" replace />} />

@@ -37,7 +37,7 @@ const Navigation = () => {
         <Link to="/" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-xl bg-primary/90" />
           <span className="text-lg font-semibold tracking-tight">
-            Invayl Tutor
+            Invayl <span className="text-green-900">AI</span>{" "}
           </span>
         </Link>
 

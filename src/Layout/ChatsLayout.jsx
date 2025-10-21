@@ -16,9 +16,14 @@ const ChatsLayout = () => {
   const threads = useSelector(selectThreads);
   const navigate = useNavigate();
 
+  // 👇 get token from auth
+  const { token } = useSelector((s) => s.auth);
+
   useEffect(() => {
-    dispatch(fetchThreads()); // load previews for sidebar
-  }, [dispatch]);
+    if (token) {
+      dispatch(fetchThreads()); // only once auth is ready
+    }
+  }, [dispatch, token]);
 
   const handleNewChat = () => {
     dispatch(startNewSession()); // reset current

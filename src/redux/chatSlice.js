@@ -82,10 +82,13 @@ export const fetchHistory = createAsyncThunk(
 // Build thread previews by grouping /chat/all items
 export const fetchThreads = createAsyncThunk(
   "chats/fetchThreads",
-  async ({ limit = 300, offset = 0 } = {}, { rejectWithValue }) => {
+  async (
+    { limit = 300, offset = 0, owner = "me" } = {},
+    { rejectWithValue }
+  ) => {
     try {
       const { data } = await apis.get("/chat/all", {
-        params: { limit, offset },
+        params: { limit, offset, owner },
       });
       // data.items: [{ id, role, content, session_id, created_at, ... }]
       const bySession = new Map();
